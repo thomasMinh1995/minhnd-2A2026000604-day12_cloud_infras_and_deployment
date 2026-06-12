@@ -41,6 +41,8 @@ def run_checks():
     results.append(check("railway.toml or render.yaml exists",
                          os.path.exists(os.path.join(base, "railway.toml")) or
                          os.path.exists(os.path.join(base, "render.yaml"))))
+    results.append(check("CI workflow exists",
+                         os.path.exists(os.path.join(base, "..", ".github", "workflows", "lab6-ci.yml"))))
 
     # ── Security ──────────────────────────────────���
     print("\n🔒 Security")

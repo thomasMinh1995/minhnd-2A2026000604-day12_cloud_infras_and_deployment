@@ -14,7 +14,6 @@ Checklist:
   ✅ CORS
   ✅ Error handling
 """
-import os
 import time
 import signal
 import logging
@@ -145,7 +144,8 @@ async def request_middleware(request: Request, call_next):
         # Security headers
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
-        response.headers.pop("server", None)
+        if "server" in response.headers:
+            del response.headers["server"]
         duration = round((time.time() - start) * 1000, 1)
         logger.info(json.dumps({
             "event": "request",
@@ -155,7 +155,7 @@ async def request_middleware(request: Request, call_next):
             "ms": duration,
         }))
         return response
-    except Exception as e:
+    except Exception:
         _error_count += 1
         raise
 
