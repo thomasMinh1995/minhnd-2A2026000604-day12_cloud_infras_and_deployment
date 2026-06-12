@@ -1,18 +1,18 @@
 # ============================================================
 # Render Blueprint — Lab 6 Production AI Agent
 #
+# QUAN TRỌNG: Deploy bằng Blueprint, KHÔNG tạo Web Service thủ công.
+#
 # Deploy:
 #   1. Push repo lên GitHub
 #   2. Render Dashboard → New → Blueprint
-#   3. Chọn repo → Blueprint path: 06-lab-complete/render.yaml
-#   4. Review → Apply
-#
-# Docs: https://render.com/docs/blueprint-spec
+#   3. Blueprint path: 06-lab-complete/render.yaml
+#   4. Apply (tạo CẢ lab6-redis VÀ lab6-ai-agent)
 # ============================================================
 
 services:
-  # ── Redis-compatible Key Value (conversation, rate limit, cost) ──
-  - type: keyvalue
+  # ── Redis (Render Key Value) — PHẢI tạo trước web service ──
+  - type: redis
     name: lab6-redis
     plan: free
     region: singapore
@@ -26,7 +26,7 @@ services:
     region: singapore
     plan: starter
     rootDir: 06-lab-complete
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: Dockerfile
     healthCheckPath: /ready
     autoDeploy: true
     envVars:
@@ -50,9 +50,10 @@ services:
         value: "30"
       - key: REDIS_CONNECT_RETRY_DELAY
         value: "2"
+      # Auto-link Redis internal URL → REDIS_URL
       - key: REDIS_URL
         fromService:
-          type: keyvalue
+          type: redis
           name: lab6-redis
           property: connectionString
       - key: AGENT_API_KEY
