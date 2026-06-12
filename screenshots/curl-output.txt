@@ -1,0 +1,48 @@
+=== curl /health ===
+HTTP/2 200 
+date: Fri, 12 Jun 2026 16:29:17 GMT
+content-type: application/json
+cf-cache-status: DYNAMIC
+rndr-id: ba1d35b2-e277-43b3
+server: cloudflare
+vary: Accept-Encoding
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-instance-id: instance-2dbee6
+x-render-origin-server: uvicorn
+cf-ray: a0aa3b7c5bfd037d-HKG
+alt-svc: h3=":443"; ma=86400
+
+{"status":"ok","version":"1.0.0","environment":"production","instance_id":"instance-2dbee6","uptime_seconds":3.1,"total_requests":5,"storage":"memory","timestamp":"2026-06-12T16:29:17.580541+00:00"}
+=== curl /ready ===
+HTTP/2 200 
+date: Fri, 12 Jun 2026 16:29:17 GMT
+content-type: application/json
+rndr-id: c7ec7bd9-3555-4b3e
+server: cloudflare
+vary: Accept-Encoding
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-instance-id: instance-2dbee6
+x-render-origin-server: uvicorn
+cf-cache-status: DYNAMIC
+cf-ray: a0aa3bc9b9330f28-HKG
+alt-svc: h3=":443"; ma=86400
+
+{"ready":true,"redis":"memory","storage":"memory","instance_id":"instance-2dbee6"}
+=== curl POST /ask ===
+HTTP/2 200 
+date: Fri, 12 Jun 2026 16:29:18 GMT
+content-type: application/json
+cf-cache-status: DYNAMIC
+rndr-id: 151669f7-3f38-427b
+server: cloudflare
+vary: Accept-Encoding
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-instance-id: instance-2dbee6
+x-render-origin-server: uvicorn
+cf-ray: a0aa3bcb7d1e166a-HKG
+alt-svc: h3=":443"; ma=86400
+
+{"answer":"Tôi là AI agent được deploy lên cloud. Câu hỏi của bạn đã được nhận.","user_id":"test","conversation_length":1,"metadata":{"environment":"production","model":"mock-agent","cost_usd":0.001}}
