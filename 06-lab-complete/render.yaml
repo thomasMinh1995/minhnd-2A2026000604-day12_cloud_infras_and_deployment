@@ -47,7 +47,7 @@ services:
       - key: COST_PER_REQUEST_USD
         value: "0.001"
       - key: REDIS_CONNECT_RETRIES
-        value: "15"
+        value: "30"
       - key: REDIS_CONNECT_RETRY_DELAY
         value: "2"
       - key: REDIS_URL

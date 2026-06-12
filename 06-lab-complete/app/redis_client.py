@@ -114,9 +114,9 @@ class RedisClient:
         raise ConnectionError(
             f"Could not connect to Redis at {settings.redis_url!r} "
             f"after {retries} attempts. Last error: {last_error}. "
-            "Docker Compose: run `docker compose up --build --scale agent=3` "
-            "(hostname `redis` only resolves inside the compose network). "
-            "Railway/Render: set REDIS_URL to your managed Redis instance URL."
+            "Render fix: Dashboard → lab6-redis → Connect → Internal Redis URL → "
+            "set REDIS_URL on lab6-ai-agent (remove any localhost value). "
+            "Docker local: docker compose up --scale agent=3."
         ) from last_error
 
     @property

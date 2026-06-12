@@ -161,18 +161,23 @@ GitHub Actions CD: set secret `RAILWAY_TOKEN` (see `CI_CD.md`).
 
 ## Deploy — Render
 
+Chi tiết: **[RENDER_DEPLOY.md](RENDER_DEPLOY.md)**
+
 1. Push repo to GitHub
-2. Render Dashboard → New → Blueprint
-3. Connect repo → uses `render.yaml`
-4. Set `AGENT_API_KEY`, optional `OPENAI_API_KEY`
-5. Add Redis addon and set `REDIS_URL`
+2. Render Dashboard → **New → Blueprint**
+3. Blueprint path: `06-lab-complete/render.yaml`
+4. Apply → chờ build
+5. Copy `AGENT_API_KEY` từ Environment tab
+6. Test public API (curl trong RENDER_DEPLOY.md)
+
+**Blueprint tạo 2 services:** `lab6-redis` (Key Value) + `lab6-ai-agent` (Docker web)
 
 ## Public API URL
 
 **TODO — update after deploy**
 
 ```
-https://your-agent.railway.app
+https://lab6-ai-agent.onrender.com
 ```
 
 ## Redis Key Design
