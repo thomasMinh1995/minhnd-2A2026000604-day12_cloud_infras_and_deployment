@@ -1,11 +1,27 @@
 # Fix nhanh: REDIS_URL is not set (Render)
 
-Lỗi deploy:
+## ✅ Deploy ngay được (code mới nhất)
+
+Sau khi **push code mới** và redeploy, app sẽ **khởi động được** ngay cả khi chưa có `REDIS_URL` (dùng in-memory tạm).
+
+Kiểm tra:
+```bash
+curl https://<service>.onrender.com/ready
+# {"ready":true,"redis":"memory","storage":"memory",...}
+```
+
+`"storage":"memory"` = chưa có Redis thật → cần làm bước dưới để đạt yêu cầu lab (stateless Redis).
+
+---
+
+## Bật Redis thật trên Render (khuyến nghị cho Lab 6)
+
+Lỗi deploy cũ:
 ```
 ValueError: REDIS_URL is not set on Render.
 ```
 
-**Nguyên nhân:** Web service `lab6-ai-agent` chạy **không có** biến `REDIS_URL` trỏ tới Redis thật.
+**Nguyên nhân:** Web service **chưa có** biến `REDIS_URL` trỏ tới Redis thật.
 
 ---
 
@@ -86,4 +102,16 @@ Test:
 curl https://<your-service>.onrender.com/ready
 ```
 
-Expected: `{"ready":true,"redis":"ok",...}`
+Expected với Redis thật: `{"ready":true,"redis":"ok","storage":"redis",...}`
+
+---
+
+## Cách D — Upstash Redis (free, dễ nhất nếu Render Redis khó tạo)
+
+1. Đăng ký [upstash.com](https://upstash.com) → **Create Database** → Region gần Singapore
+2. Copy **Redis URL** (dạng `rediss://default:xxx@xxx.upstash.io:6379`)
+3. Render → **lab6-ai-agent** → **Environment** → Add:
+   - Key: `REDIS_URL`
+   - Value: paste Upstash URL
+4. Save → **Manual Deploy**
+5. `curl .../ready` → `"storage":"redis"`

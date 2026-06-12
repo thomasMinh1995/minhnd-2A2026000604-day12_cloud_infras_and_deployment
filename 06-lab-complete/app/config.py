@@ -4,6 +4,24 @@ import uuid
 from dataclasses import dataclass, field
 
 
+def _resolve_redis_url() -> str:
+    """Resolve Redis URL from env (Render Blueprint or manual Dashboard link)."""
+    env = os.getenv("ENVIRONMENT", "production")
+    for key in ("REDIS_URL", "REDIS_CONNECTION_STRING", "KEY_VALUE_URL"):
+        value = os.getenv(key, "").strip()
+        if not value:
+            continue
+        # Ignore compose/local URLs accidentally set on cloud
+        if env == "production" and (
+            "localhost" in value
+            or "127.0.0.1" in value
+            or "://redis:" in value
+        ):
+            continue
+        return value
+    return ""
+
+
 @dataclass
 class Settings:
     host: str = field(default_factory=lambda: os.getenv("HOST", "0.0.0.0"))
@@ -36,7 +54,7 @@ class Settings:
         default_factory=lambda: float(os.getenv("COST_PER_REQUEST_USD", "0.001"))
     )
 
-    redis_url: str = field(default_factory=lambda: os.getenv("REDIS_URL", ""))
+    redis_url: str = field(default_factory=_resolve_redis_url)
     redis_connect_retries: int = field(
         default_factory=lambda: int(os.getenv("REDIS_CONNECT_RETRIES", "30"))
     )
@@ -47,20 +65,6 @@ class Settings:
     def validate(self) -> "Settings":
         if self.environment == "production" and self.agent_api_key in ("", "dev-key-change-me"):
             raise ValueError("AGENT_API_KEY must be set in production!")
-
-        if self.environment == "production":
-            if not self.redis_url.strip():
-                raise ValueError(
-                    "REDIS_URL is not set. On Render: Dashboard → lab6-redis → Connect → "
-                    "copy Internal Redis URL → paste into lab6-ai-agent Environment as REDIS_URL. "
-                    "Or redeploy via Blueprint 06-lab-complete/render.yaml (auto-links Redis)."
-                )
-            if "localhost" in self.redis_url or "127.0.0.1" in self.redis_url:
-                raise ValueError(
-                    "REDIS_URL must not use localhost on cloud. "
-                    "Render: use Internal URL from lab6-redis (e.g. redis://red-xxxxx:6379)."
-                )
-
         return self
 
 
