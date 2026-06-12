@@ -37,7 +37,13 @@ class Settings:
     )
 
     redis_url: str = field(
-        default_factory=lambda: os.getenv("REDIS_URL", "redis://redis:6379/0")
+        default_factory=lambda: os.getenv("REDIS_URL", "redis://localhost:6379/0")
+    )
+    redis_connect_retries: int = field(
+        default_factory=lambda: int(os.getenv("REDIS_CONNECT_RETRIES", "15"))
+    )
+    redis_connect_retry_delay: float = field(
+        default_factory=lambda: float(os.getenv("REDIS_CONNECT_RETRY_DELAY", "2"))
     )
 
     def validate(self) -> "Settings":

@@ -42,6 +42,7 @@ services:
 
   redis:
     image: redis:7-alpine
+    hostname: redis
     command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]

@@ -1,13 +1,16 @@
-"""Redis client with in-memory fallback for local tests without Redis."""
+"""Redis client with retry on startup and in-memory fallback for tests."""
 from __future__ import annotations
 
 import json
+import logging
 import time
 from typing import Any
 
 import redis
 
 from app.config import settings
+
+logger = logging.getLogger(__name__)
 
 
 class MemoryRedis:
@@ -64,19 +67,57 @@ class RedisClient:
         if not settings.redis_url:
             self._client = MemoryRedis()
             self.using_memory = True
+            logger.warning("REDIS_URL not set — using in-memory store")
             return
 
-        try:
-            client = redis.from_url(settings.redis_url, decode_responses=True)
-            client.ping()
-            self._client = client
-            self.using_memory = False
-        except Exception:
-            if settings.environment in ("development", "test"):
-                self._client = MemoryRedis()
-                self.using_memory = True
-            else:
-                raise
+        last_error: Exception | None = None
+        retries = settings.redis_connect_retries
+        delay = settings.redis_connect_retry_delay
+
+        for attempt in range(1, retries + 1):
+            try:
+                client = redis.from_url(
+                    settings.redis_url,
+                    decode_responses=True,
+                    socket_connect_timeout=5,
+                    socket_timeout=5,
+                    retry_on_timeout=True,
+                )
+                client.ping()
+                self._client = client
+                self.using_memory = False
+                if attempt > 1:
+                    logger.info("Connected to Redis on attempt %s", attempt)
+                return
+            except Exception as exc:
+                last_error = exc
+                if attempt < retries:
+                    logger.warning(
+                        "Redis connect attempt %s/%s failed: %s — retrying in %ss",
+                        attempt,
+                        retries,
+                        exc,
+                        delay,
+                    )
+                    time.sleep(delay)
+
+        if settings.environment in ("development", "test"):
+            logger.warning(
+                "Redis unavailable (%s) — falling back to in-memory store for %s",
+                last_error,
+                settings.environment,
+            )
+            self._client = MemoryRedis()
+            self.using_memory = True
+            return
+
+        raise ConnectionError(
+            f"Could not connect to Redis at {settings.redis_url!r} "
+            f"after {retries} attempts. Last error: {last_error}. "
+            "Docker Compose: run `docker compose up --build --scale agent=3` "
+            "(hostname `redis` only resolves inside the compose network). "
+            "Railway/Render: set REDIS_URL to your managed Redis instance URL."
+        ) from last_error
 
     @property
     def client(self) -> redis.Redis | MemoryRedis:
@@ -87,7 +128,10 @@ class RedisClient:
     def ping(self) -> bool:
         if self._client is None:
             return False
-        return bool(self._client.ping())
+        try:
+            return bool(self._client.ping())
+        except Exception:
+            return False
 
     def get_json(self, key: str) -> Any:
         raw = self.client.get(key)
