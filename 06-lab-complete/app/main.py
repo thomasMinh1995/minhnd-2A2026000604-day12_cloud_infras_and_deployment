@@ -164,7 +164,8 @@ def ready():
         raise HTTPException(status_code=503, detail="Not ready")
     return {
         "ready": True,
-        "redis": "ok",
+        "redis": "memory" if redis_client.using_memory else "ok",
+        "storage": "memory" if redis_client.using_memory else "redis",
         "instance_id": settings.instance_id,
     }
 

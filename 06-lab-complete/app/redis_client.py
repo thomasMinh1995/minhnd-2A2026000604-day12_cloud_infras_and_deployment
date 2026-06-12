@@ -67,7 +67,14 @@ class RedisClient:
         if not settings.redis_url:
             self._client = MemoryRedis()
             self.using_memory = True
-            logger.warning("REDIS_URL not set — using in-memory store")
+            if settings.environment == "production":
+                logger.warning(
+                    "REDIS_URL not set on Render — using in-memory store (NOT stateless). "
+                    "Fix: lab6-redis → Connect → Internal URL → set REDIS_URL on web service. "
+                    "See RENDER_REDIS_FIX.md"
+                )
+            else:
+                logger.warning("REDIS_URL not set — using in-memory store")
             return
 
         last_error: Exception | None = None

@@ -39,7 +39,8 @@ def test_ready():
         assert response.status_code == 200
         data = response.json()
         assert data["ready"] is True
-        assert data["redis"] == "ok"
+        assert data["redis"] in ("ok", "memory")
+        assert data["storage"] in ("redis", "memory")
 
 
 def test_ask_without_api_key():
